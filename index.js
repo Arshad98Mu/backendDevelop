@@ -5,6 +5,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const appRoute = express.Router();
 const User = require("./model/userModel");
+const bcrypt = require("bcryptjs");
 
 const PORT = 4000;
 
@@ -62,19 +63,25 @@ appRoute.post("/api/signup", (req, res, next) => {
 
       const newUser = new User();
       newUser.email = email;
-      newUser.password = password;
+      //newUser.password = password;
+
       newUser.firstName = firstname;
       newUser.lastName = lastname;
-      newUser.save((err, user) => {
-        if (err) {
+      bcrypt.hash(password, 10, (err, hash) => {
+        // Store hash password in DB
+        newUser.password = hash;
+
+        newUser.save((err, user) => {
+          if (err) {
+            return res.send({
+              success: false,
+              message: "Error: Server error"
+            });
+          }
           return res.send({
-            success: false,
-            message: "Error: Server error"
+            success: true,
+            message: "Signed up"
           });
-        }
-        return res.send({
-          success: true,
-          message: "Signed up"
         });
       });
     }
