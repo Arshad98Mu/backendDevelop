@@ -22,6 +22,8 @@ connection.once(`open`, () => {
 app.use(cors());
 app.use(bodyParser.json());
 
+//new changes 21/10/2019
+
 app.use("/app", appRoute);
 
 appRoute.post("/api/signup", (req, res, next) => {
