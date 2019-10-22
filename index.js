@@ -90,6 +90,55 @@ appRoute.post("/api/signup", (req, res, next) => {
   );
 });
 
+appRoute.get("/api/login", (req, res, next) => {
+  const userEmail = req.body.email;
+  const userPassword = req.body.password;
+  if (!userEmail) {
+    return res.send({
+      success: false,
+      message: "Email cannot be blank."
+    });
+  }
+  if (!userPassword) {
+    return res.send({
+      success: false,
+      message: "Password cannot be blank."
+    });
+  }
+   User.find({
+     email: userEmail
+   }).then((user) => {
+     
+     if(user.length === 0) {
+       res.send({
+         status: "user not found"
+       })
+       // check pswd
+       bcrypt.compare(userPassword, user.password).then(isMatch => {
+         if(isMatch) {
+           res.send(user);
+         }
+         else {
+           res.send({
+             status: "Incorrect Password"
+           })
+           //res.redirect('/');
+         }
+       });
+     }
+     else 
+     res.send(user);
+   }).catch(err => console.log(err));
+    // (err, user) => {
+    //   if(err) {
+    //     console.log("here")
+    //     res.send({status : "not found"})
+    //   }
+    //   res.send(user);
+    // }
+   
+});
+
 app.listen(PORT, () => {
   console.log("Server is running on Port: " + PORT);
 });
