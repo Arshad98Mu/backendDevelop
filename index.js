@@ -105,40 +105,29 @@ appRoute.get("/api/login", (req, res, next) => {
       message: "Password cannot be blank."
     });
   }
-   User.find({
-     email: userEmail
-   }).then((user) => {
-     
-     if(user.length === 0) {
-       res.send({
-         status: "user not found"
-       })
-       // check pswd
-       bcrypt.compare(userPassword, user.password).then(isMatch => {
-         if(isMatch) {
-           res.send(user);
-         }
-         else {
-           res.send({
-             status: "Incorrect Password"
-           })
-           //res.redirect('/');
-         }
-       });
-     }
-     else 
-     res.send(user);
-   }).catch(err => console.log(err));
-    // (err, user) => {
-    //   if(err) {
-    //     console.log("here")
-    //     res.send({status : "not found"})
-    //   }
-    //   res.send(user);
-    // }
-   
+  User.find({
+    email: userEmail
+  }).then((user) => {
+    bcrypt.compare(userPassword, user.password, (err, result) => {
+      console.log("inside bcrypt");
+      if(result == true) {
+        console.log("inside bcrypt-if");
+        res.send({ status: "If Part" })
+      }
+      else if(user.length === 0) {
+        res.send({
+          status: "User not found"
+        })
+      }
+      else {
+        res.send({
+          status: "Else Part"
+        })
+      }
+    });
+    //console.log("len is zero");
+  }).catch(err => console.log(err));
 });
-
 app.listen(PORT, () => {
   console.log("Server is running on Port: " + PORT);
 });
