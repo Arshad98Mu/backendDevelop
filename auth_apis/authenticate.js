@@ -3,6 +3,8 @@ const express = require("express");
 const app = express();
 const appRoute = express.Router();
 const bcrypt = require("bcryptjs");
+const jwt = require('jsonwebtoken');
+const config = require('../config');
 
 //signup
 
@@ -60,9 +62,13 @@ module.exports = signup = appRoute.post("/api/signup", (req, res, next) => {
               message: "Error: Server error"
             });
           }
+          var token = jwt.sign({email: email}, config.secret, {
+            expiresIn: 86400
+          });
           return res.send({
             success: true,
-            message: "Signed up"
+            message: "Signed up",
+            token: token
           });
         });
       });
@@ -85,7 +91,19 @@ module.exports = login = appRoute.get("/api/login", (req, res, next) => {
       } else
         bcrypt.compare(userPassword, user.password, (err, result) => {
           if (result) {
-            res.send({ user, status: "success" });
+            var token = req.headers['x-accept-token'];
+            if(!token) {
+              res.send({
+                status: "No token is provided"
+              });
+            }
+            else {
+              jwt.verify(token, config.secret, (err, decoded) => {
+                if(err)
+                  return res.status(500).send({ status: "Failed to authenticate token"});
+                res.status(200).send(decoded);
+              });
+            }
           } else {
             res.send({ status: "incorrect password" });
           }
